@@ -1,28 +1,24 @@
 import numpy as np
-import random
 import networkx as nx
 import matplotlib.pyplot as plt
 
 # --- Network Configuration (Graph) ---
-# Nodes 0 to 7. Same matrix as before.
 DISTANCE_MATRIX = np.array([
 #   0  1  2  3  4  5  6  7
-    [0, 2, 4, 0, 0, 0, 0, 0], # 0 (Source/Start Node)
+    [0, 2, 4, 0, 0, 0, 0, 0], # 0
     [2, 0, 1, 6, 0, 0, 0, 0], # 1
     [4, 1, 0, 1, 3, 0, 0, 0], # 2
     [0, 6, 1, 0, 0, 2, 5, 0], # 3
     [0, 0, 3, 0, 0, 1, 0, 4], # 4
     [0, 0, 0, 2, 1, 0, 1, 2], # 5
     [0, 0, 0, 5, 0, 1, 0, 1], # 6
-    [0, 0, 0, 0, 4, 2, 1, 0]  # 7 (Destination/End Node)
+    [0, 0, 0, 0, 4, 2, 1, 0]  # 7
 ])
 
 NUM_NODES = len(DISTANCE_MATRIX)
 START_NODE = 0
-END_NODE = 7 # Used for ACO only
 
 # --- TSP Nearest Neighbor Algorithm ---
-
 def solve_tsp_nearest_neighbor(start_node):
     """
     Applies the Greedy Nearest Neighbor heuristic for TSP.
@@ -42,14 +38,12 @@ def solve_tsp_nearest_neighbor(start_node):
         # Find the nearest unvisited neighbor
         for neighbor in list(unvisited):
             distance = DISTANCE_MATRIX[current_node, neighbor]
-            # Must be a direct link and shorter than current min
             if distance > 0 and distance < min_distance:
                 min_distance = distance
                 next_node = neighbor
         
-        # If no unvisited neighbor is reachable (graph is not Hamiltonian/complete)
+        # If no unvisited neighbor is reachable
         if next_node == -1:
-            # For this simple implementation, we stop if we get stuck.
             print("TSP: Could not find a path to all nodes (stuck).")
             return None, float('inf')
             
@@ -65,41 +59,12 @@ def solve_tsp_nearest_neighbor(start_node):
         tour_distance += distance_back_to_start
         tour.append(start_node)
     else:
-        # If the last node can't connect back to the start
         print("TSP: Last node cannot return to the start node.")
         return None, float('inf')
         
     return tour, tour_distance
 
-# --- Execute TSP and ACO (using the results from the previous ACO run) ---
-
-# 1. TSP Solution
-tsp_tour, tsp_distance = solve_tsp_nearest_neighbor(START_NODE)
-
-# 2. ACO Solution (We'll use the final best result from the previous ACO code run)
-# Based on the previous execution, the likely shortest path was:
-aco_path = [0, 1, 2, 3, 5, 7] # Shortest path 0 to 7
-aco_distance = 8.0 # (2+1+1+2+2)
-
-# 3. Print Results
-print("--- Results Comparison ---")
-print(f"Graph Nodes: {list(range(NUM_NODES))}")
-print("--------------------------")
-
-print("1. ACO Routing Solution (Shortest Path 0 -> 7):")
-print(f"Path: {' -> '.join(map(str, aco_path))}")
-print(f"Distance: {aco_distance}")
-print(f"Nodes Visited: {len(aco_path)}")
-print("--------------------------")
-
-print("2. TSP Nearest Neighbor Solution (Tour visiting all nodes):")
-print(f"Tour: {' -> '.join(map(str, tsp_tour))}")
-print(f"Distance: {tsp_distance}")
-print(f"Nodes Visited: {len(set(tsp_tour))}")
-print("--------------------------")
-
 # --- Visualization Function for TSP ---
-
 def draw_tsp_tour(distance_matrix, tour, distance):
     """Draws the network graph, highlighting the TSP tour."""
     G = nx.Graph()
@@ -128,7 +93,7 @@ def draw_tsp_tour(distance_matrix, tour, distance):
         
     # Draw nodes
     node_colors = ['skyblue'] * NUM_NODES
-    node_colors[tour[0]] = 'green' # Start node
+    node_colors[tour[0]] = 'green'  # Start node
     
     nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=1200)
     nx.draw_networkx_labels(G, pos, font_size=14, font_weight='bold', font_color='black')
@@ -140,6 +105,21 @@ def draw_tsp_tour(distance_matrix, tour, distance):
     plt.axis('off')
     plt.show()
 
-# 4. Visualize TSP Tour
-draw_tsp_tour(DISTANCE_MATRIX, tsp_tour, tsp_distance)
-#
+# --- Execute TSP ---
+tsp_tour, tsp_distance = solve_tsp_nearest_neighbor(START_NODE)
+
+# --- Print Results ---
+print("--- TSP Nearest Neighbor Results ---")
+print(f"Graph Nodes: {list(range(NUM_NODES))}")
+print("--------------------------")
+
+if tsp_tour is not None:
+    print("TSP Nearest Neighbor Solution (Tour visiting all nodes):")
+    print(f"Tour: {' -> '.join(map(str, tsp_tour))}")
+    print(f"Distance: {tsp_distance}")
+    print(f"Nodes Visited: {len(set(tsp_tour))}")
+    print("--------------------------")
+    draw_tsp_tour(DISTANCE_MATRIX, tsp_tour, tsp_distance)
+else:
+    print("No complete TSP tour found.")
+    print("--------------------------")
