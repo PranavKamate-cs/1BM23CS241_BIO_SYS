@@ -217,6 +217,8 @@ def postprocess_with_astar(best_path):
 # ==============================
 # Run GWO, postprocess, and plot
 # ==============================
+import numpy as np
+print("Name: PRANAV GAJANAN KAMATE\nUSN: 1BM23CS241")
 best_path, convergence = gwo_path_planning(num_wolves=30, num_points=25, max_iter=150)
 
 # Post-process: replace colliding straight segments with grid A* paths
